@@ -24,18 +24,17 @@ def population_total(counties:list[data.CountyDemographics]):
         totalPop = totalPop + i.population['2014 Population']
     return totalPop
 
-def population_field(field:str,counties:list[data.CountyDemographics]):
+def population_field(field:str,subField:str,counties:list[data.CountyDemographics]):
     subPop = 0.0
     fieldPop = 0.0
     for i in counties:
-        percent = i.field
+        percent = i.field[subField]
         subPop = percent/100 * i.population
         fieldPop = fieldPop + subPop
     return fieldPop
 
-def percent_field(field:str,counties:list[data.CountyDemographics]):
-    #percent of total pop that is sub
-    percent = population_field(field,counties)/ population_total(counties)
+def percent_field(field:str,subField:str,counties:list[data.CountyDemographics]):
+    percent = population_field(field,subField,counties)/ population_total(counties)
     return percent
 
 def filter_state(st:str,counties:list[data.CountyDemographics]):
@@ -67,11 +66,17 @@ def operations(counties:list[data.CountyDemographics]):
         for file_name in os.listdir('inputs'):
             filePath = os.path.join('inputs',file_name)
             with open(filePath,'r') as file:
+                lineNum = 0
                 for l in file:
-                    line = l.strip("\n")
+                    lineNum += 1
+                    line = l.strip()
                     args = line.split(":")
-                    if args == []: # error handling - checking for blank line
-                        print("Error: empty command line on line ",l+1)
+
+                    # skip blank lines
+                    if not line:
+                        continue
+                    if len(args) > 1:
+                        subFields = args[1].split(".")
                     elif args[0] == "population-total":
                         if len(args) > 1: # error handling - too many arguments
                             print("Error: malformed line on line ",l+1)
@@ -82,13 +87,15 @@ def operations(counties:list[data.CountyDemographics]):
                             print("Error: malformed line on line ",l+1)
                         else:
                             field = args[1]
-                            print ("2014 ",field,": ",population_field(field,counties))
+                            subField = subFields[1]
+                            print ("2014 ",field,": ",population_field(field,subField,counties))
                     elif args[0] == "percent":
                         if len(args) > 2: # error handling - too many arguments
                             print("Error: malformed line on line", l+1)
                         else:
                             field = args[1]
-                            print("2014 ",field,"percentage: ",percent_field(field,counties))
+                            subField = subFields[1]
+                            print("2014 ",field,"percentage: ",percent_field(field,subField,counties))
                     elif args[0] == "filter-state":
                         if len(args) > 2: # error handling - too many arguments
                             print("Error: malformed line on line", l+1)
