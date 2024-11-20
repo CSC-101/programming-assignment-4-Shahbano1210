@@ -3,16 +3,6 @@ import build_data
 import data
 import os
 
-#task 1
-# putting it together
-# load data
-# print entries number
-#take command line arg
-#then operation
-#one operation per line, components separated by :
-# then error handling - no file &
-# malformed lines(line num, skip and cont.) but blank is good
-
 #display
 def display(counties:list[data.CountyDemographics]):
     print(len(counties)," records loaded")
@@ -73,9 +63,9 @@ def operations(counties:list[data.CountyDemographics]):
                     args = line.split(":")
 
                     # skip blank lines
-                    if not line:
+                    if args == []:
                         continue
-                    if len(args) > 1:
+                    elif len(args) > 1:
                         subFields = args[1].split(".")
                     elif args[0] == "population-total":
                         if len(args) > 1: # error handling - too many arguments
@@ -102,6 +92,7 @@ def operations(counties:list[data.CountyDemographics]):
                         else:
                             st = args[1]
                             print("Filter: state == ",st," ",filter_state(st,counties)," entries")
+                            counties = filter_state(st,counties)
                     elif args[0] == "filter-gt":
                         if len(args) > 3: # error handling - too many arguments
                             print("Error: malformed line on line", l+1)
@@ -109,6 +100,7 @@ def operations(counties:list[data.CountyDemographics]):
                             field = args[1]
                             num = float(args[2])
                             print("Filter: ", field, "> ", num, filter_greater(field, num, counties), ' entries')
+                            counties = (filter_greater(field, num, counties))
                     elif args[0] == "filter-lt":
                         if len(args) > 3: # error handling - too many arguments
                             print("Error: malformed line on line", l+1)
@@ -116,6 +108,7 @@ def operations(counties:list[data.CountyDemographics]):
                             field = args[1]
                             num = float(args[2])
                             print("Filter: ",field,"< ", num,filter_less(field,num,counties),' entries')
+                            counties = filter_less(field, num, counties)
     except FileNotFoundError:
         print ("Error: no file found")
 
